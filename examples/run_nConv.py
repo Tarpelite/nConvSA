@@ -71,7 +71,8 @@ try:
 except ImportError:
     from tensorboardX import SummaryWriter
 
-
+from pudb import set_trace()
+set_trace()
 logger = logging.getLogger(__name__)
 
 ALL_MODELS = sum(
@@ -210,8 +211,9 @@ def train(args, train_dataset, model, tokenizer):
     )
     set_seed(args)  # Added here for reproductibility
     for _ in train_iterator:
-        epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
-        for step, batch in enumerate(epoch_iterator):
+        # epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
+        iter_bar = tqdm(train_dataloader, desc="Iter(loss=X.XXX)")
+        for step, batch in enumerate(iter_bar):
 
             # Skip past any already trained steps if resuming training
             if steps_trained_in_current_epoch > 0:
@@ -240,6 +242,7 @@ def train(args, train_dataset, model, tokenizer):
                 loss.backward()
 
             tr_loss += loss.item()
+            iter_bar.set_description("Iter (loss=%5.3f)" % loss.item())
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 if args.fp16:
                     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), args.max_grad_norm)
@@ -290,7 +293,7 @@ def train(args, train_dataset, model, tokenizer):
                     logger.info("Saving optimizer and scheduler states to %s", output_dir)
 
             if args.max_steps > 0 and global_step > args.max_steps:
-                epoch_iterator.close()
+                iter_bar.close()
                 break
         if args.max_steps > 0 and global_step > args.max_steps:
             train_iterator.close()
