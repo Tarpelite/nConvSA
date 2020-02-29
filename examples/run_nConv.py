@@ -110,7 +110,7 @@ MODEL_CLASSES = {
 
 def compute_metrics(preds, labels):
     res = {}
-    res["f1"] = f1_score(labels, preds， average="macro")
+    res["f1"] = f1_score(labels, preds, average="macro")
 
     return res
 
