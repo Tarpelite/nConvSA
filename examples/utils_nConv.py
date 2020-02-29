@@ -141,7 +141,7 @@ class DataProcessor(object):
 
 
 
-class nCovProcessor(DataProcessor):
+class nConvProcessor(DataProcessor):
     """Processor for the MRPC data set (GLUE version)."""
 
     def get_example_from_tensor_dict(self, tensor_dict):
@@ -222,7 +222,7 @@ def nConv_convert_examples_to_features(
         is_tf_dataset = True
 
     if task is not None:
-        processor = nCovProcessor()
+        processor = nConvProcessor()
         if label_list is None:
             label_list = processor.get_labels()
             logger.info("Using label list %s for task %s" % (label_list, task))
