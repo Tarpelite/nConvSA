@@ -446,7 +446,8 @@ def test(args, model, tokenizer, prefix=""):
         
         assert len(all_test_ids) == len(preds)
 
-        with open("result.csv", "w+") as f:
+        result_file = os.path.join(args.output_dir, "result.csv")
+        with open(result_file, "w+") as f:
            
             line = ",".join(['id', 'y']) + "\n"
             f.write(line)
