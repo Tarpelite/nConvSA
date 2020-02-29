@@ -463,11 +463,13 @@ def test(args, model, tokenizer, prefix=""):
                 all_test_data = list(csv.reader(f, delimiter="\t", quotechar=None))
             
             result_file = os.path.join(args.output_dir, "result.csv")
-            for record, y in zip(all_test_data, preds):
-                y = int(y) -1
-                record = record + [str(y)]
-                line = "\t".join(record) + "\n"
-                f.write(line)
+            logger.info("writing predictions to {}".format(result_file))
+            with open(result_file, "w+") as f:
+                for record, y in zip(all_test_data, preds):
+                    y = int(y) -1
+                    record = record + [str(y)]
+                    line = "\t".join(record) + "\n"
+                    f.write(line)
 
     return results
 
