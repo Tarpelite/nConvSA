@@ -441,7 +441,7 @@ def test(args, model, tokenizer, prefix=""):
 
         test_file = os.path.join(args.data_dir, "test.tsv")
         with open(test_file, "w", encoding="utf-8") as f:
-            all_test_ids = [x[0] for x in list(csv.reader(f, delimiter="\t", quotechar=quotechar))]
+            all_test_ids = [x[0] for x in list(csv.reader(f, delimiter="\t", quotechar=None))]
         
         assert len(all_test_ids) == len(preds)
 
@@ -449,7 +449,8 @@ def test(args, model, tokenizer, prefix=""):
             writer = csv.writer(f, delimiter=",")
             writer.writerow(['id', 'y'])
             for id_, y in zip(all_test_ids, preds):
-                writer.writerow([id_, y])
+                y = int(y) - 1
+                writer.writerow([str(id_), str(y)])
 
     return results
 
