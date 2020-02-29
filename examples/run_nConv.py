@@ -466,7 +466,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=True):
     output_mode = "classification"
     # Load data features from cache or dataset file
     part = "train"
-    get_func=processor.get_train_examples
+    get_func = processor.get_train_examples
     if evaluate:
         part = "evaluate"
         get_func=processor.get_dev_examples
@@ -492,9 +492,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=True):
             # HACK(label indices are swapped in RoBERTa pretrained model)
             label_list[1], label_list[2] = label_list[2], label_list[1]
 
-        examples = (
-            processor.get_dev_examples(args.data_dir) if evaluate else processor.get_train_examples(args.data_dir)
-        )
+        examples = get_func(args.data_dir) 
         features = convert_examples_to_features(
             examples,
             tokenizer,
