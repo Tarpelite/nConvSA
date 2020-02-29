@@ -103,12 +103,12 @@ MODEL_CLASSES = {
 }
 
 def compute_metrics(preds, labels):
-
+    res = {}
     res["acc"] = accuracy_score(preds, labels)
     res["recall"] = recall_score(preds, labels)
     res["f1"] = f1_score(preds, labels)
 
-    retun res
+    return res
 
 
 def set_seed(args):
