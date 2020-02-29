@@ -450,7 +450,7 @@ def test(args, model, tokenizer, prefix=""):
             assert len(all_test_ids) == len(preds)
 
             result_file = os.path.join(args.output_dir, "result.csv")
-            with open(result_file, "w+") as f:
+            with open(result_file, "w+", encoding="utf-8") as f:
                 line = ",".join(['id', 'y']) + "\n"
                 f.write(line)
                 for id_, y in zip(all_test_ids, preds):
@@ -464,7 +464,7 @@ def test(args, model, tokenizer, prefix=""):
             
             result_file = os.path.join(args.output_dir, "result.csv")
             logger.info("writing predictions to {}".format(result_file))
-            with open(result_file, "w+") as f:
+            with open(result_file, "w+", encoding="uft-8") as f:
                 for record, y in zip(all_test_data, preds):
                     y = int(y) -1
                     record = record + [str(y)]
