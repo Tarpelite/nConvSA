@@ -34,6 +34,7 @@ from transformers import is_tf_available, is_torch_available
 
 if is_tf_available():
     import tensorflow as tf
+
 logger = logging.getLogger(__name__)
 
 
@@ -181,7 +182,7 @@ class nCovProcessor(DataProcessor):
         return examples
 
 
-def nCov_convert_examples_to_features(
+def nConv_convert_examples_to_features(
     examples,
     tokenizer,
     max_length=512,
