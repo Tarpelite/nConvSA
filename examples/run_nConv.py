@@ -466,10 +466,13 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=True):
     output_mode = "classification"
     # Load data features from cache or dataset file
     part = "train"
+    get_func=processor.get_train_examples
     if evaluate:
         part = "evaluate"
+        get_func=processor.get_dev_examples
     if test:
         part = "test"
+        get_func = processor.get_test_examples
     cached_features_file = os.path.join(
         args.data_dir,
         "cached_{}_{}_{}_{}".format(
@@ -488,6 +491,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=True):
         if task in ["mnli", "mnli-mm"] and args.model_type in ["roberta", "xlmroberta"]:
             # HACK(label indices are swapped in RoBERTa pretrained model)
             label_list[1], label_list[2] = label_list[2], label_list[1]
+
         examples = (
             processor.get_dev_examples(args.data_dir) if evaluate else processor.get_train_examples(args.data_dir)
         )
