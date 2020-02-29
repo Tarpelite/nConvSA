@@ -108,9 +108,11 @@ MODEL_CLASSES = {
 
 def compute_metrics(preds, labels):
     res = {}
-    res["acc"] = accuracy_score([preds], [labels])
-    res["recall"] = recall_score([preds], [labels])
-    res["f1"] = f1_score([preds], [labels])
+    preds = [str(x) for x in preds]
+    labels = [str(x) for x in labels]
+    res["acc"] = accuracy_score([labels], [preds])
+    res["recall"] = recall_score([labels], [preds])
+    res["f1"] = f1_score([labels], [preds])
 
     return res
 
