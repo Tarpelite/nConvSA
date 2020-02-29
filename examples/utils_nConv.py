@@ -136,7 +136,7 @@ class DataProcessor(object):
     @classmethod
     def _read_tsv(cls, input_file, quotechar=None):
         """Reads a tab separated value file."""
-        with open(input_file, "r", encoding="utf-8-sig") as f:
+        with open(input_file, "r", encoding="utf-8") as f:
             return list(csv.reader(f, delimiter="\t", quotechar=quotechar))
 
 
@@ -162,6 +162,9 @@ class nConvProcessor(DataProcessor):
     def get_dev_examples(self, data_dir):
         """See base class."""
         return self._create_examples(self._read_tsv(os.path.join(data_dir, "dev.tsv")), "dev")
+    
+    def get_test_examples(self, data_dir):
+        return self._create_examples(self._read_tsv(os.path.join(data_dir, "test.tsv")), "test")
 
     def get_labels(self):
         """See base class."""
@@ -175,8 +178,12 @@ class nConvProcessor(DataProcessor):
             text_a = line[1]
             text_b = line[2]
             text_c = line[3]
-            label = line[-1]
+            if set_type != "test":
+                label = line[-1]
+            else:
+                label = "0"
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=text_b, text_c=text_c, label=label))
+            
         return examples
 
 
