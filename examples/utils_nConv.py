@@ -28,12 +28,12 @@ import os
 from transformers.tokenization_bert import BasicTokenizer, whitespace_tokenize
 
 # Required by XLNet evaluation method to compute optimal threshold (see write_predictions_extended() method)
-if is_tf_available():
-    import tensorflow as tf
+
 
 from transformers import is_tf_available, is_torch_available
 
-
+if is_tf_available():
+    import tensorflow as tf
 logger = logging.getLogger(__name__)
 
 
