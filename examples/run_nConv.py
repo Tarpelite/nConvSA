@@ -71,9 +71,12 @@ try:
 except ImportError:
     from tensorboardX import SummaryWriter
 
-from pudb import set_trace
-set_trace()
+# from pudb import set_trace
+# set_trace()
+
 logger = logging.getLogger(__name__)
+
+
 
 ALL_MODELS = sum(
     (
@@ -105,9 +108,9 @@ MODEL_CLASSES = {
 
 def compute_metrics(preds, labels):
     res = {}
-    res["acc"] = accuracy_score(preds, labels)
-    res["recall"] = recall_score(preds, labels)
-    res["f1"] = f1_score(preds, labels)
+    res["acc"] = accuracy_score([preds], [labels])
+    res["recall"] = recall_score([preds], [labels])
+    res["f1"] = f1_score([preds], [labels])
 
     return res
 
@@ -334,6 +337,7 @@ def evaluate(args, model, tokenizer, prefix=""):
         nb_eval_steps = 0
         preds = None
         out_label_ids = None
+        
         for batch in tqdm(eval_dataloader, desc="Evaluating"):
             model.eval()
             batch = tuple(t.to(args.device) for t in batch)
