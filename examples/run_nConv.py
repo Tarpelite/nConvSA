@@ -401,7 +401,7 @@ def test(args, model, tokenizer, prefix=""):
             model = torch.nn.DataParallel(model)
 
         # Eval!
-        logger.info("***** Running evaluation {} *****".format(prefix))
+        logger.info("***** Running prediction {} *****".format(prefix))
         logger.info("  Num examples = %d", len(eval_dataset))
         logger.info("  Batch size = %d", args.eval_batch_size)
         eval_loss = 0.0
@@ -409,7 +409,7 @@ def test(args, model, tokenizer, prefix=""):
         preds = None
         out_label_ids = None
         
-        for batch in tqdm(eval_dataloader, desc="Evaluating"):
+        for batch in tqdm(eval_dataloader, desc="Prediction"):
             model.eval()
             batch = tuple(t.to(args.device) for t in batch)
 
@@ -447,12 +447,13 @@ def test(args, model, tokenizer, prefix=""):
         assert len(all_test_ids) == len(preds)
 
         with open("result.csv", "wb") as f:
-            writer = csv.writer(f, delimiter=",")
-            writer.writerow(['id', 'y'])
+           
+            line = ",".join(['id', 'y']) + "\n"
+            f.write(line)
             for id_, y in zip(all_test_ids, preds):
                 y = int(y) - 1
-                writer.writerow([str(id_), str(y)])
-
+                line=",".join([str(id_), str(y)]))
+                f.write(line)
     return results
 
 
