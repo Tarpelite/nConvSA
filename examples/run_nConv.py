@@ -440,7 +440,8 @@ def test(args, model, tokenizer, prefix=""):
         results.update(result)
 
         test_file = os.path.join(args.data_dir, "test.tsv")
-        with open(test_file, "w", encoding="utf-8") as f:
+
+        with open(test_file, "r", encoding="utf-8") as f:
             all_test_ids = [x[0] for x in list(csv.reader(f, delimiter="\t", quotechar=None))]
         
         assert len(all_test_ids) == len(preds)
