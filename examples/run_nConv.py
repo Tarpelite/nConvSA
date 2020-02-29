@@ -452,7 +452,7 @@ def test(args, model, tokenizer, prefix=""):
             f.write(line)
             for id_, y in zip(all_test_ids, preds):
                 y = int(y) - 1
-                line=",".join([str(id_), str(y)]))
+                line=",".join([str(id_), str(y)]) + "\n"
                 f.write(line)
     return results
 
