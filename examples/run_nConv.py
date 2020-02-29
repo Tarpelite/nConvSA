@@ -28,7 +28,7 @@ import torch
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, TensorDataset
 from torch.utils.data.distributed import DistributedSampler
 from tqdm import tqdm, trange
-from seqeval.metrics import accuracy_score, recall_score, f1_score
+
 
 
 from transformers import (
@@ -71,6 +71,8 @@ try:
 except ImportError:
     from tensorboardX import SummaryWriter
 
+from sklearn.metrics import f1_score
+
 # from pudb import set_trace
 # set_trace()
 
@@ -108,11 +110,7 @@ MODEL_CLASSES = {
 
 def compute_metrics(preds, labels):
     res = {}
-    preds = [str(x) for x in preds]
-    labels = [str(x) for x in labels]
-    res["acc"] = accuracy_score([labels], [preds])
-    res["recall"] = recall_score([labels], [preds])
-    res["f1"] = f1_score([labels], [preds])
+    res["f1"] = f1_score(labels, preds， average="macro")
 
     return res
 
