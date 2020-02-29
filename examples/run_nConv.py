@@ -71,7 +71,7 @@ try:
 except ImportError:
     from tensorboardX import SummaryWriter
 
-from pudb import set_trace()
+from pudb import set_trace
 set_trace()
 logger = logging.getLogger(__name__)
 
