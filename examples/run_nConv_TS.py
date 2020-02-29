@@ -441,34 +441,20 @@ def test(args, model, tokenizer, prefix=""):
 
         test_file = os.path.join(args.data_dir, "test.tsv")
 
+        with open(test_file, "r", encoding="utf-8") as f:
+            all_test_ids = [x[0] for x in list(csv.reader(f, delimiter="\t", quotechar=None))]
+        
+        assert len(all_test_ids) == len(preds)
 
-        if not args.do_save_all:
-
-            with open(test_file, "r", encoding="utf-8") as f:
-                all_test_ids = [x[0] for x in list(csv.reader(f, delimiter="\t", quotechar=None))]
-            
-            assert len(all_test_ids) == len(preds)
-
-            result_file = os.path.join(args.output_dir, "result.csv")
-            with open(result_file, "w+") as f:
-                line = ",".join(['id', 'y']) + "\n"
+        result_file = os.path.join(args.output_dir, "result.csv")
+        with open(result_file, "w+") as f:
+           
+            line = ",".join(['id', 'y']) + "\n"
+            f.write(line)
+            for id_, y in zip(all_test_ids, preds):
+                y = int(y) - 1
+                line=",".join([str(id_), str(y)]) + "\n"
                 f.write(line)
-                for id_, y in zip(all_test_ids, preds):
-                    y = int(y) - 1
-                    line=",".join([str(id_), str(y)]) + "\n"
-                    f.write(line)
-            
-        else:
-            with open(test_file, "r", encoding="utf-8") as f:
-                all_test_data = list(csv.reader(f, delimiter="\t", quotechar=None))
-            
-            result_file = os.path.join(args.output_dir, "result.csv")
-            for record, y in zip(all_test_data, preds):
-                y = int(y) -1
-                record = record + [str(y)]
-                line = "\t".join(record) + "\n"
-                f.write(line)
-
     return results
 
 
@@ -668,7 +654,6 @@ def main():
     parser.add_argument("--server_ip", type=str, default="", help="For distant debugging.")
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
     parser.add_argument("--do_test", action="store_true")
-    parser.add_argument("--do_save_all", action="store_true")
     args = parser.parse_args()
 
     if (
@@ -758,6 +743,7 @@ def main():
 
     model.to(args.device)
 
+
     logger.info("Training/evaluation parameters %s", args)
 
     # Training
@@ -809,7 +795,6 @@ def main():
             result = evaluate(args, model, tokenizer, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
             results.update(result)
-
     if args.do_test and args.local_rank in [-1, 0]:
 
         tokenizer = tokenizer_class.from_pretrained(args.output_dir, do_lower_case=args.do_lower_case)
