@@ -130,11 +130,11 @@ def combine_weights(model_T, model_S, alpha):
     S_dict = model_S.state_dict()
     
     res_dict = copy.deepcopy(S_dict)
-    for item in I_dict:
+    for item in T_dict:
         res_dict[item] = alpha*T_dict[item] + (1 - alpha)*S_dict[item]
     
     model_S.load_state_dict(res_dict)
-    return model_s
+    return model_S
 
 
 
