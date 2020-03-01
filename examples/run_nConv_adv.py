@@ -235,6 +235,7 @@ def train(args, train_dataset, model, tokenizer):
 
             # =======================  Code for adversarial training ========================
             input_ids = inputs["input_ids"]
+            input_mask = inputs["attention_mask"]
             if isinstance(model, torch.nn.DataParallel):
                 embeds_init = model.module.bert.embeddings.word_embeddings(input_ids)
             else:
