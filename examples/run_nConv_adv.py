@@ -255,7 +255,7 @@ def train(args, train_dataset, model, tokenizer):
             else:
                 delta = torch.zeros_like(embeds_init)
             
-            for astep in range(args.adv_step):
+            for astep in range(args.adv_steps):
                 delta.requires_grad_()
                 inputs["inputs_embeds"] = delta + embeds_init
                 inputs["input_ids"] = None
