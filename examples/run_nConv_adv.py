@@ -234,6 +234,7 @@ def train(args, train_dataset, model, tokenizer):
             
 
             # =======================  Code for adversarial training ========================
+            input_ids = inputs["input_ids"]
             if isinstance(model, torch.nn.DataParallel):
                 embeds_init = model.module.bert.embeddings.word_embeddings(input_ids)
             else:
@@ -742,7 +743,7 @@ def main():
     parser.add_argument('--adv_init_mag', type=float, default=0)
     parser.add_argument('--norm_type', type=str, default="l2", choices=["l2", "linf"])
     parser.add_argument('--adv_max_norm', type=float, default=0, help="set to 0 to be unlimited")
-    
+
     args = parser.parse_args()
 
     if (
