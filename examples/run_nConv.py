@@ -520,6 +520,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=False):
             pad_on_left=bool(args.model_type in ["xlnet"]),  # pad on the left for xlnet
             pad_token=tokenizer.convert_tokens_to_ids([tokenizer.pad_token])[0],
             pad_token_segment_id=4 if args.model_type in ["xlnet"] else 0,
+            add_time_user=args.add_time_user
         )
         if args.local_rank in [-1, 0]:
             logger.info("Saving features into cached file %s", cached_features_file)
@@ -671,6 +672,7 @@ def main():
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
     parser.add_argument("--do_test", action="store_true")
     parser.add_argument("--do_save_all", action="store_true")
+    parser.add_argument("--add_user_time", action="store_true")
     args = parser.parse_args()
 
     if (
