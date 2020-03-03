@@ -187,15 +187,15 @@ def k_fold_train(args, model, tokenizer, splits=5):
     
     results = []
     for train_index, test_index in cv.split(all_input_ids):
-        train_input_ids = [all_input_ids[i] for i in train_index]
-        train_attention_mask = [all_attention_mask[i] for i in train_index]
-        train_token_type_ids = [all_token_type_ids[i] for i in all_token_type_ids]
-        train_labels = [all_labels[i] for i in train_index]
+        train_input_ids = torch.tensor([all_input_ids[i] for i in train_index], dtype=torch.long)
+        train_attention_mask = torch.tensor([all_attention_mask[i] for i in train_index], dtype=torch.long)
+        train_token_type_ids = torch.tensor([all_token_type_ids[i] for i in all_token_type_ids],dtype=torch.long)
+        train_labels = torch.tensor([all_labels[i] for i in train_index], dtype=torch.long)
 
-        test_input_ids = [all_input_ids[i] for i in test_index]
-        test_attention_mask = [all_attention_mask[i] for i in test_index]
-        test_token_type_ids = [all_token_type_ids[i] for i in test_index]
-        test_labels = [all_labels[i] for i in test_index]
+        test_input_ids = torch.tensor([all_input_ids[i] for i in test_index], dtype=torch.long)
+        test_attention_mask = torch.tensor([all_attention_mask[i] for i in test_index], dtype=torch.long)
+        test_token_type_ids = torch.tensor([all_token_type_ids[i] for i in test_index], dtype=torch.long)
+        test_labels = torch.tensor([all_labels[i] for i in test_index], dtype=torch.long)
 
         train_dataset = TensorDataset(train_input_ids, train_attention_mask, train_token_type_ids, train_labels)
 
