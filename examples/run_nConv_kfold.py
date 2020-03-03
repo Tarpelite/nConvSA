@@ -404,7 +404,7 @@ def evaluate(args, eval_dataset, model, tokenizer, prefix=""):
     results = {}
 
     eval_output_dir = eval_outputs_dirs[0]
-    eval_task = 
+    eval_task = args.task_name
     
     # eval_dataset = load_and_cache_examples(args, eval_task, tokenizer, evaluate=True)
 
