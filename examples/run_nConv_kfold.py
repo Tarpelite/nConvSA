@@ -762,7 +762,7 @@ def main():
     parser.add_argument("--server_port", type=str, default="", help="For distant debugging.")
     parser.add_argument("--do_test", action="store_true")
     parser.add_argument("--do_save_all", action="store_true")
-    parser.add_argument("--add_user_time", action="store_true")
+    parser.add_argument("--add_time_user", action="store_true")
     parser.add_argument("--splits", type=int, default=5)
     args = parser.parse_args()
 
