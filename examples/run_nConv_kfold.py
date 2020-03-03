@@ -858,7 +858,7 @@ def main():
     # Training
     if args.do_train:
         results = k_fold_train(args, model, tokenizer, splits=args.splits)
-        logger.info(" global_step = %s, average loss = %s", global_step, tr_loss)
+        
 
    
     if args.do_test and args.local_rank in [-1, 0]:
