@@ -128,15 +128,15 @@ def set_seed(args):
 def k_fold_train(args, model, tokenizer, splits=5):
     cv = KFold(n_splits=splits, random_state=0)
 
-    if args.local_rank in [-1, 0]:
-        torch.distributed.barrier()
+    # if args.local_rank in [-1, 0]:
+    #     torch.distributed.barrier()
     
     processor = nConvProcessor()
     output_mode = "classification"
     # Load data features from cache or dataset file
     part = "train"
     get_func = processor.get_train_examples
-    
+    task=args.task_name
     cached_features_file = os.path.join(
         args.data_dir,
         "cached_{}_{}_{}_{}".format(
@@ -203,7 +203,7 @@ def k_fold_train(args, model, tokenizer, splits=5):
         test_token_type_ids, test_labels)
 
         _ , _ = train(args, train_dataset, model, tokenizer)
-        result = evaluate(args, eval_dataset, model, tokenier, prefix="eval")
+        result = evaluate(args, test_dataset, model, tokenizer, prefix="eval")
         results.append(result)
     
     print(results)

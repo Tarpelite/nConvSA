@@ -198,6 +198,7 @@ def nConv_convert_examples_to_features(
     pad_token=0,
     pad_token_segment_id=0,
     mask_padding_with_zero=True,
+    add_time_user=True,
 ):
     """
     Loads a data file into a list of ``InputFeatures``
@@ -249,7 +250,11 @@ def nConv_convert_examples_to_features(
         if ex_index % 10000 == 0:
             logger.info("Writing example %d/%d" % (ex_index, len_examples))
 
-        inputs = tokenizer.encode_plus(" ".join([example.text_a, example.text_b]), example.text_c, add_special_tokens=True, max_length=max_length,)
+        if add_time_user:
+            inputs = tokenizer.encode_plus(" ".join([example.text_a, example.text_b]), example.text_c, add_special_tokens=True, max_length=max_length,)
+        else:
+            inputs = tokenizer.encode_plus(example.text_c, add_special_tokens=True, max_length=max_length,)
+            
         input_ids, token_type_ids = inputs["input_ids"], inputs["token_type_ids"]
 
         # The mask has 1 for real tokens and 0 for padding tokens. Only real
