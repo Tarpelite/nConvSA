@@ -139,6 +139,8 @@ def train(args, train_dataset, model, tokenizer):
     else:
         t_total = len(train_dataloader) // args.gradient_accumulation_steps * args.num_train_epochs
 
+    if args.warmup_ratio > 0:
+        args.warmup_steps = int(args.warmup_ratio * t_total)
     # Prepare optimizer and schedule (linear warmup and decay)
     no_decay = ["bias", "LayerNorm.weight"]
     optimizer_grouped_parameters = [
@@ -216,7 +218,7 @@ def train(args, train_dataset, model, tokenizer):
     set_seed(args)  # Added here for reproductibility
     for _ in train_iterator:
         # epoch_iterator = tqdm(train_dataloader, desc="Iteration", disable=args.local_rank not in [-1, 0])
-        iter_bar = tqdm(train_dataloader, desc="Iter(loss=X.XXX)")
+        iter_bar = tqdm(train_dataloader, desc="Iter(loss=X.XXX, lr=X.XXXXXXX)")
         for step, batch in enumerate(iter_bar):
 
             # Skip past any already trained steps if resuming training
@@ -246,7 +248,7 @@ def train(args, train_dataset, model, tokenizer):
                 loss.backward()
 
             tr_loss += loss.item()
-            iter_bar.set_description("Iter (loss=%5.3f)" % loss.item())
+            iter_bar.set_description("Iter (loss=%5.3f, lr=%9.7f)" % (loss.item(), scheduler.get_lr()[0]))
             if (step + 1) % args.gradient_accumulation_steps == 0:
                 if args.fp16:
                     torch.nn.utils.clip_grad_norm_(amp.master_params(optimizer), args.max_grad_norm)
@@ -654,6 +656,8 @@ def main():
         "--overwrite_cache", action="store_true", help="Overwrite the cached training and evaluation sets",
     )
     parser.add_argument("--seed", type=int, default=42, help="random seed for initialization")
+
+    parser.add_argument("--warmup_ratio", type=float, default=0.0)
 
     parser.add_argument(
         "--fp16",
