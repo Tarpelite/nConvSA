@@ -105,7 +105,9 @@ pos_label_list = [
     "nz", "v", "vd", "vn",
     "a", "ad", "an", "d",
     "m", "q", "r", "p",
-    "c", "u", "xc", "w"
+    "c", "u", "xc", "w",
+    "x",
+
 ]
 
 MODEL_CLASSES = {
