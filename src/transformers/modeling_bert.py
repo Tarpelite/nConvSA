@@ -1245,7 +1245,7 @@ class BertMTNconv(BertPreTrainedModel):
         if tag_ids is not None:
             if attention_mask is not None:
                 active_loss = attention_mask.view(-1) == 1
-                active_logits = sequence_logits.view(-1, self.num_labels)
+                active_logits = sequence_logits.view(-1, self.num_pos_labels)
                 active_labels = torch.where(
                     active_loss, tag_ids.view(-1), torch.tensor(-100).type_as(tag_ids)
                 )
@@ -1258,7 +1258,8 @@ class BertMTNconv(BertPreTrainedModel):
             loss_fct = CrossEntropyLoss()
             cls_loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
         
-        outputs = (cls_loss, pos_loss) + outputs
+            outputs = (cls_loss, pos_loss) + outputs
+
         return outputs
 
 
