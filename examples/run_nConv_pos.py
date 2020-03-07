@@ -779,6 +779,7 @@ def main():
         from_tf=bool(".ckpt" in args.model_name_or_path),
         config=config,
         cache_dir=args.cache_dir if args.cache_dir else None,
+        num_pos_labels=len(pos_label_list)
     )
 
     if args.local_rank == 0:
@@ -832,7 +833,7 @@ def main():
             global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
             prefix = checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
 
-            model = model_class.from_pretrained(checkpoint)
+            model = model_class.from_pretrained(checkpoint, num_pos_labels = len(pos_label_list))
             model.to(args.device)
             result = evaluate(args, model, tokenizer, prefix=prefix)
             result = dict((k + "_{}".format(global_step), v) for k, v in result.items())
@@ -852,7 +853,7 @@ def main():
             global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
             prefix = checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
 
-            model = model_class.from_pretrained(checkpoint)
+            model = model_class.from_pretrained(checkpoint, num_pos_labels=len(pos_label_list))
             model.to(args.device)
             result = test(args, model, tokenizer, prefix=prefix)
 
