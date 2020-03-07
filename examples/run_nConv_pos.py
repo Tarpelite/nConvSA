@@ -229,7 +229,7 @@ def train(args, train_dataset, model, tokenizer):
                 continue
 
             model.train()
-            batch = tuple(t.to(args.device) for t in batch)
+            batch = tuple(t.half().to(args.device) for t in batch)
             inputs = {"input_ids": batch[0], "attention_mask": batch[1], "labels": batch[3], "tag_ids":batch[4]}
             if args.model_type != "distilbert":
                 inputs["token_type_ids"] = (
@@ -550,7 +550,7 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False, test=False):
         all_labels = torch.tensor([f.label for f in features], dtype=torch.long)
     elif output_mode == "regression":
         all_labels = torch.tensor([f.label for f in features], dtype=torch.float)
-    all_tag_ids = torch.tensor([f.tag_ids  for f in features], dtype=torch.float)
+    all_tag_ids = torch.tensor([f.tag_ids  for f in features], dtype=torch.long)
 
     dataset = TensorDataset(all_input_ids, all_attention_mask, all_token_type_ids, all_labels, all_tag_ids)
     return dataset
