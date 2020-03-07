@@ -106,7 +106,7 @@ pos_label_list = [
     "a", "ad", "an", "d",
     "m", "q", "r", "p",
     "c", "u", "xc", "w",
-    "x",
+    "x", "eng",
 
 ]
 
