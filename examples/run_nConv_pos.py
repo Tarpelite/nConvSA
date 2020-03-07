@@ -759,6 +759,13 @@ def main():
     label_list = processor.get_labels()
     num_labels = len(label_list)
 
+    label_file_path = os.path.join(args.data_dir, "tags.txt")
+    pos_label_list = []
+    with open(label_file_path, "r", encoding="utf-8") as f:
+        for line in f.readlines():
+            line = line.strip()
+            pos_label_list.append(line)
+
     # Load pretrained model and tokenizer
     if args.local_rank not in [-1, 0]:
         torch.distributed.barrier()  # Make sure only the first process in distributed training will download model & vocab
