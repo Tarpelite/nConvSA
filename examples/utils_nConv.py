@@ -226,6 +226,7 @@ class nConvProcessor(DataProcessor):
                 tags=tags,
                 label=label
             ))
+        return examples
 
     
 
