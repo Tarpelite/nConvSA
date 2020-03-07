@@ -72,25 +72,15 @@ class InputExample(object):
         """Serializes this instance to a JSON string."""
         return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
-class InputFeatures(object):
-    """
-    A single set of features of data.
 
-    Args:
-        input_ids: Indices of input sequence tokens in the vocabulary.
-        attention_mask: Mask to avoid performing attention on padding token indices.
-            Mask values selected in ``[0, 1]``:
-            Usually  ``1`` for tokens that are NOT MASKED, ``0`` for MASKED (padded) tokens.
-        token_type_ids: Segment token indices to indicate first and second portions of the inputs.
-        label: Label corresponding to the input
-    """
+class InputPosExample(object):
 
-    def __init__(self, input_ids, attention_mask=None, token_type_ids=None, label=None):
-        self.input_ids = input_ids
-        self.attention_mask = attention_mask
-        self.token_type_ids = token_type_ids
+    def __init__(self, guid, tokens, tags=None, label=None):
+        self.guid = guid
+        self.tokens = tokens
+        self.tags = tags
         self.label = label
-
+    
     def __repr__(self):
         return str(self.to_json_string())
 
@@ -102,6 +92,33 @@ class InputFeatures(object):
     def to_json_string(self):
         """Serializes this instance to a JSON string."""
         return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+
+
+
+
+
+class InputFeatures(object):
+    def __init__(self, input_ids, attention_mask=None, token_type_ids=None, label=None, tag_ids=None):
+        self.input_ids = input_ids
+        self.attention_mask = attention_mask
+        self.token_type_ids = token_type_ids
+        self.label = label
+        self.tag_ids = tag_ids
+    
+    def __repr__(self):
+        return str(self.to_json_string())
+
+    def to_dict(self):
+        """Serializes this instance to a Python dictionary."""
+        output = copy.deepcopy(self.__dict__)
+        return output
+
+    def to_json_string(self):
+        """Serializes this instance to a JSON string."""
+        return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+
+
+
 
 class DataProcessor(object):
     """Base class for data converters for sequence classification data sets."""
@@ -169,7 +186,17 @@ class nConvProcessor(DataProcessor):
     def get_labels(self):
         """See base class."""
         return ["-1","0", "1"]
-
+    
+    def get_pos_train_examples(self, data_dir):
+        logger.info("LOOKING AT {}".format(os.path.join(data_dir, "train.tsv")))
+        return self._create_pos_examples(self._read_tsv(os.path.join(data_dir, "train.tsv")),"train")
+    
+    def get_pos_dev_examples(self, data_dir):
+        return self._create_pos_examples(self._read_tsv(os.path.join(data_dir, "dev.tsv")),"dev")
+    
+    def get_pos_test_examples(self, data_dir):
+        return self._create_pos_examples(self._read_tsv(os.path.join(data_dir, "test.tsv")),"test")
+    
     def _create_examples(self, lines, set_type):
         """Creates examples for the training and dev sets."""
         examples = []
@@ -185,6 +212,22 @@ class nConvProcessor(DataProcessor):
             examples.append(InputExample(guid=guid, text_a=text_a, text_b=text_b, text_c=text_c, label=label))
             
         return examples
+    
+    def _create_pos_examples(self, lines, set_type):
+        examples = []
+        for (i, line) in enumerate(lines):
+            guid = "%s-%s" % (set_type, i)
+            tokens = line[0].split()
+            tags = line[1].split()
+            label = line[2]
+            examples.append(InputPosExample(
+                guid=guid,
+                tokens=tokens,
+                tags=tags,
+                label=label
+            ))
+
+    
 
 
 def nConv_convert_examples_to_features(
@@ -199,6 +242,8 @@ def nConv_convert_examples_to_features(
     pad_token_segment_id=0,
     mask_padding_with_zero=True,
     add_time_user=True,
+    pos_tag=False,
+    pos_label_list=None
 ):
     """
     Loads a data file into a list of ``InputFeatures``
@@ -237,6 +282,9 @@ def nConv_convert_examples_to_features(
             logger.info("Using output mode %s for task %s" % (output_mode, task))
 
     label_map = {label: i for i, label in enumerate(label_list)}
+    tag_ids = None
+    if pos_tag:
+        pos_label_map = {label:i for i,label in enumerate(pos_label_list)}
 
     features = []
     for (ex_index, example) in enumerate(examples):
@@ -250,8 +298,14 @@ def nConv_convert_examples_to_features(
         if ex_index % 10000 == 0:
             logger.info("Writing example %d/%d" % (ex_index, len_examples))
 
-        if add_time_user:
-            inputs = tokenizer.encode_plus(" ".join([example.text_a, example.text_b]), example.text_c, add_special_tokens=True, max_length=max_length,)
+        if pos_tag:
+            inputs = tokenizer.encode_plus(example.tokens, add_special_tokens=True, max_length=max_length)
+            tags = example.tags
+            if len(tags) + 2 > max_length:
+                tags = tags[:max_length - 2]
+            
+            tag_ids = [-100] + [pos_label_map[x] for x in tags] + [-100]
+
         else:
             inputs = tokenizer.encode_plus(example.text_c, add_special_tokens=True, max_length=max_length,)
             
@@ -271,6 +325,10 @@ def nConv_convert_examples_to_features(
             input_ids = input_ids + ([pad_token] * padding_length)
             attention_mask = attention_mask + ([0 if mask_padding_with_zero else 1] * padding_length)
             token_type_ids = token_type_ids + ([pad_token_segment_id] * padding_length)
+            if pos_tag:
+                tag_ids = tag_ids + ([-100] * padding_length)
+            
+
 
         assert len(input_ids) == max_length, "Error with input length {} vs {}".format(len(input_ids), max_length)
         assert len(attention_mask) == max_length, "Error with input length {} vs {}".format(
@@ -278,6 +336,10 @@ def nConv_convert_examples_to_features(
         )
         assert len(token_type_ids) == max_length, "Error with input length {} vs {}".format(
             len(token_type_ids), max_length
+        )
+
+        assert len(tag_ids) == max_length, "Error with input length {} vs {}".format(
+            len(tag_ids), max_length
         )
 
         if output_mode == "classification":
@@ -293,11 +355,13 @@ def nConv_convert_examples_to_features(
             logger.info("input_ids: %s" % " ".join([str(x) for x in input_ids]))
             logger.info("attention_mask: %s" % " ".join([str(x) for x in attention_mask]))
             logger.info("token_type_ids: %s" % " ".join([str(x) for x in token_type_ids]))
+            logger.info("pos_tag_ids: %s" % " ".join([str(x) for x in tag_ids]))
             logger.info("label: %s (id = %d)" % (example.label, label))
 
+        
         features.append(
             InputFeatures(
-                input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, label=label
+                input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, label=label, tag_ids=tag_ids
             )
         )
 

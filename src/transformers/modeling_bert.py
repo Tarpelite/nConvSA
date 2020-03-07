@@ -1179,6 +1179,7 @@ class BertForSequenceClassification(BertPreTrainedModel):
         pooled_output = outputs[1]
 
         pooled_output = self.dropout(pooled_output)
+    
         logits = self.classifier(pooled_output)
 
         outputs = (logits,) + outputs[2:]  # add hidden states and attention if they are here
@@ -1194,6 +1195,72 @@ class BertForSequenceClassification(BertPreTrainedModel):
             outputs = (loss,) + outputs
 
         return outputs  # (loss), logits, (hidden_states), (attentions)
+
+
+class BertMTNconv(BertPreTrainedModel):
+    def __init__(self, config, num_pos_labels):
+        super().__init__(config)
+        self.num_labels = config.num_labels
+
+        self.bert = BertModel(config)
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.classifier = nn.Linear(config.hidden_size, self.config.num_labels)
+
+        self.num_pos_labels = num_pos_labels
+        self.pos_classifier = nn.Linear(config.hidden_size, self.num_pos_labels)
+
+        self.pos_loss_func = CrossEntropyLoss(ignore_index=-100)
+
+    def forward(
+        self, 
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        tag_ids = None
+        ):
+
+        outputs = self.bert(
+            input_ids,
+            attention_mask = attention_mask,
+            token_type_ids = token_type_ids,
+            position_ids = position_ids,
+            head_mask = head_mask,
+            inputs_embeds = inputs_embeds
+        )
+
+        pooled_output = outputs[1]
+        pooled_output = self.dropout(pooled_output)
+        sequence_output = outputs[0]
+        sequence_output = self.dropout(sequence_output)
+
+        
+        pooled_logits = self.classifier(pooled_output)
+        sequence_logits = self.pos_classifier(sequence_output)
+
+        outputs = (pooled_logits, sequence_logits) + outputs[2:]
+        if tag_ids is not None:
+            if attention_mask is not None:
+                active_loss = attention_mask.view(-1) == 1
+                active_logits = sequence_logits.view(-1, self.num_labels)
+                active_labels = torch.where(
+                    active_loss, tag_ids.view(-1), torch.tensor(-100).type_as(tag_ids)
+                )
+
+                pos_loss = self.pos_loss_func(active_logits, active_labels)
+            else:
+                pos_loss = self.pos_loss_fct(sequence_logits.view(-1, self.num_pos_labels), tag_ids.view(-1))
+
+        if labels is not None:
+            loss_fct = CrossEntropyLoss()
+            cls_loss = loss_fct(pooled_logits.view(-1, self.num_labels), labels.view(-1))
+        
+        outputs = (cls_loss, pos_loss) + outputs
+        return outputs
+
 
 
 @add_start_docstrings(
