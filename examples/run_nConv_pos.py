@@ -98,17 +98,7 @@ ALL_MODELS = sum(
     ),
     (),
 )
-
-pos_label_list = [
-    "n", "f", "s", "t",
-    "nr", "ns","nt", "nw",
-    "nz", "v", "vd", "vn",
-    "a", "ad", "an", "d",
-    "m", "q", "r", "p",
-    "c", "u", "xc", "w",
-    "x", "eng",
-
-]
+pos_label_list = []
 
 MODEL_CLASSES = {
     "bert": (BertConfig, BertMTNconv, BertTokenizer),
@@ -760,11 +750,11 @@ def main():
     num_labels = len(label_list)
 
     label_file_path = os.path.join(args.data_dir, "tags.txt")
-    pos_label_list = []
     with open(label_file_path, "r", encoding="utf-8") as f:
         for line in f.readlines():
             line = line.strip()
             pos_label_list.append(line)
+    print(pos_label_list)
 
     # Load pretrained model and tokenizer
     if args.local_rank not in [-1, 0]:
