@@ -238,7 +238,7 @@ def train(args, train_dataset, model, tokenizer):
             outputs = model(**inputs)
             cls_loss, pos_loss = outputs[:2]  # model outputs are always tuple in transformers (see doc)
 
-            loss = cls_loss + pos_loss
+            loss = args.alpha*cls_loss + (1-args.alpha)*pos_loss
             if args.n_gpu > 1:
                 loss = loss.mean()  # mean() to average on multi-gpu parallel training
             if args.gradient_accumulation_steps > 1:
@@ -689,6 +689,7 @@ def main():
     parser.add_argument("--do_test", action="store_true")
     parser.add_argument("--do_save_all", action="store_true")
     parser.add_argument("--add_time_user", action="store_true")
+    parser.add_argument("--alpha", type=float, default=0.5)
     args = parser.parse_args()
 
     if (
@@ -812,10 +813,6 @@ def main():
         # Good practice: save your training arguments together with the trained model
         torch.save(args, os.path.join(args.output_dir, "training_args.bin"))
 
-        # Load a trained model and vocabulary that you have fine-tuned
-        model = model_class.from_pretrained(args.output_dir)
-        tokenizer = tokenizer_class.from_pretrained(args.output_dir)
-        model.to(args.device)
 
     # Evaluation
     results = {}
@@ -852,7 +849,7 @@ def main():
             global_step = checkpoint.split("-")[-1] if len(checkpoints) > 1 else ""
             prefix = checkpoint.split("/")[-1] if checkpoint.find("checkpoint") != -1 else ""
 
-            model = model_class.from_pretrained(checkpoint, num_pos_labels=len(pos_label_list))
+            model = model_class.from_pretrained(checkpoint, num_pos_labels= len(pos_label_list))
             model.to(args.device)
             result = test(args, model, tokenizer, prefix=prefix)
 

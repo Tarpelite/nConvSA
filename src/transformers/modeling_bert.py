@@ -1232,10 +1232,11 @@ class BertMTNconv(BertPreTrainedModel):
             inputs_embeds = inputs_embeds
         )
 
-        pooled_output = outputs[1]
-        pooled_output = self.dropout(pooled_output)
+       
         sequence_output = outputs[0]
         sequence_output = self.dropout(sequence_output)
+        pooled_output = outputs[1]
+        pooled_output = self.dropout(pooled_output)
 
         
         pooled_logits = self.classifier(pooled_output)
