@@ -435,12 +435,13 @@ def test(args, model, tokenizer, prefix=""):
                
                 eval_loss += 0
             nb_eval_steps += 1
+            
             if preds is None:
                 preds = logits.detach().cpu().numpy()
                 out_label_ids = batch[3].detach().cpu().numpy()
             else:
                 preds = np.append(preds, logits.detach().cpu().numpy(), axis=0)
-                out_label_ids = np.append(out_label_ids, inputs["labels"].detach().cpu().numpy(), axis=0)
+                out_label_ids = np.append(out_label_ids, batch[3].detach().cpu().numpy(), axis=0)
 
         eval_loss = eval_loss / nb_eval_steps
         if args.output_mode == "classification":
