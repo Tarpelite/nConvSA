@@ -437,7 +437,7 @@ def test(args, model, tokenizer, prefix=""):
             nb_eval_steps += 1
             if preds is None:
                 preds = logits.detach().cpu().numpy()
-                out_label_ids = inputs["labels"].detach().cpu().numpy()
+                out_label_ids = batch[3].detach().cpu().numpy()
             else:
                 preds = np.append(preds, logits.detach().cpu().numpy(), axis=0)
                 out_label_ids = np.append(out_label_ids, inputs["labels"].detach().cpu().numpy(), axis=0)
